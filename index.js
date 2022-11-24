@@ -19,6 +19,9 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     const clothesCategoryCollection = client.db('clothesHub').collection('clothesCategory')
+    const tshirtsCollection = client.db('clothesHub').collection('tshirts')
+    const hoodiesCollection = client.db('clothesHub').collection('hoodies')
+    const jeansCollection = client.db('clothesHub').collection('jeans')
 
     app.get('/category', async (req, res) => {
         const query = {}
