@@ -74,6 +74,13 @@ async function run() {
         const user = await usersCollection.findOne(query)
         res.send({ isSellers: user?.type === 'Seller' })
     })
+    app.get('/users/buyers/:email', async (req, res) => {
+        const email = req.params.email
+        console.log(3, email)
+        const query = { email }
+        const user = await usersCollection.findOne(query)
+        res.send({ isBuyers: user?.type === 'Buyers' })
+    })
 }
 run().catch(console.log)
 
