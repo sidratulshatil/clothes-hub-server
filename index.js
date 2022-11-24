@@ -28,6 +28,27 @@ async function run() {
         const result = await clothesCategoryCollection.find(query).toArray()
         res.send(result)
     })
+    app.get('/category/:id', async (req, res) => {
+        const id = req.params.id
+        // console.log(id)
+        if (id === '1') {
+            const query = {}
+            const result = await tshirtsCollection.find(query).toArray()
+            return res.send(result)
+        }
+        if (id === '2') {
+            const query = {}
+            const result = await hoodiesCollection.find(query).toArray()
+            return res.send(result)
+        }
+        if (id === '3') {
+            const query = {}
+            const result = await jeansCollection.find(query).toArray()
+            return res.send(result)
+        }
+        res.send('Not Found')
+    })
+
 }
 run().catch(console.log)
 
