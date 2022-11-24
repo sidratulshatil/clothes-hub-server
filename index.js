@@ -14,7 +14,7 @@ app.use(express.json())
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xwh8ees.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri)
+// console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
@@ -22,6 +22,7 @@ async function run() {
     const tshirtsCollection = client.db('clothesHub').collection('tshirts')
     const hoodiesCollection = client.db('clothesHub').collection('hoodies')
     const jeansCollection = client.db('clothesHub').collection('jeans')
+    const usersCollection = client.db('clothesHub').collection('users')
 
     app.get('/category', async (req, res) => {
         const query = {}
@@ -48,7 +49,31 @@ async function run() {
         }
         res.send('Not Found')
     })
-
+    app.post('/users', async (req, res) => {
+        const user = req.body
+        // console.log('user', user)
+        const result = await usersCollection.insertOne(user)
+        res.send(result)
+    })
+    app.get('/users', async (req, res) => {
+        const query = {}
+        const users = await usersCollection.find(query).toArray()
+        res.send(users)
+    })
+    app.get('/users/admin/:email', async (req, res) => {
+        const email = req.params.email
+        // console.log(2, email)
+        const query = { email }
+        const user = await usersCollection.findOne(query)
+        res.send({ isAdmin: user?.role === 'admin' })
+    })
+    app.get('/users/sellers/:email', async (req, res) => {
+        const email = req.params.email
+        console.log(3, email)
+        const query = { email }
+        const user = await usersCollection.findOne(query)
+        res.send({ isSellers: user?.type === 'Seller' })
+    })
 }
 run().catch(console.log)
 
