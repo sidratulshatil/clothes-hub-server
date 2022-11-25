@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 require('dotenv').config()
 const app = express()
@@ -100,6 +100,12 @@ async function run() {
         const query = { email }
         const user = await usersCollection.findOne(query)
         res.send({ isBuyers: user?.type === 'Buyers' })
+    })
+    app.delete('/users/:id', async (req, res) => {
+        const id = req.params.id
+        const filter = { _id: ObjectId(id) }
+        const result = await usersCollection.deleteOne(filter)
+        res.send(result)
     })
     app.post('/bookings', async (req, res) => {
         const booking = req.body
