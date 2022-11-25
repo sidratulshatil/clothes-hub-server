@@ -23,6 +23,7 @@ async function run() {
     const hoodiesCollection = client.db('clothesHub').collection('hoodies')
     const jeansCollection = client.db('clothesHub').collection('jeans')
     const usersCollection = client.db('clothesHub').collection('users')
+    const bookingsCollection = client.db('clothesHub').collection('bookings')
 
     app.get('/category', async (req, res) => {
         const query = {}
@@ -80,6 +81,37 @@ async function run() {
         const query = { email }
         const user = await usersCollection.findOne(query)
         res.send({ isBuyers: user?.type === 'Buyers' })
+    })
+    app.post('/bookings', async (req, res) => {
+        const booking = req.body
+        console.log(booking)
+
+        // const query = {
+        //     appointmentDate: booking.appointmentDate,
+        //     treatment: booking.treatment,
+        //     email: booking.email
+        // }
+        // const alreadyBooked = await bookingsCollection.find(query).toArray()
+        // if (alreadyBooked.length) {
+        //     const message = `You already booked on ${booking.appointmentDate}`
+        //     return res.send({ acknowledged: false, message })
+        // }
+        const result = await bookingsCollection.insertOne(booking)
+        res.send(result)
+    })
+    app.get('/bookings', async (req, res) => {
+        const email = req.query.email
+        // // console.log(email)
+        // const decodedEmail = req.decoded.email
+        // if (email !== decodedEmail) {
+        //     return res.status(403).send({ message: "Forbidden Access" })
+        // }
+        // console.log('Token', req.headers.authorization)
+        // const query = {
+        //     email: email
+        // }
+        const bookings = await bookingsCollection.find(query).toArray()
+        res.send(bookings)
     })
 }
 run().catch(console.log)
