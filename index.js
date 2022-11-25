@@ -50,6 +50,25 @@ async function run() {
         }
         res.send('Not Found')
     })
+    app.post('/bookings/product', async (req, res) => {
+        const user = req.body
+        const category = req.body.category_name
+        if (category === 'T Shirts') {
+            const result = await tshirtsCollection.insertOne(user)
+            return res.send(result)
+        }
+        if (category === 'Hoodies') {
+            const result = await hoodiesCollection.insertOne(user)
+            return res.send(result)
+        }
+        if (category === 'Jeans') {
+            const result = await jeansCollection.insertOne(user)
+            return res.send(result)
+        }
+
+
+
+    })
     app.post('/users', async (req, res) => {
         const user = req.body
         // console.log('user', user)
@@ -70,20 +89,21 @@ async function run() {
     })
     app.get('/users/sellers/:email', async (req, res) => {
         const email = req.params.email
-        console.log(3, email)
+        // console.log(3, email)
         const query = { email }
         const user = await usersCollection.findOne(query)
         res.send({ isSellers: user?.type === 'Seller' })
     })
     app.get('/users/buyers/:email', async (req, res) => {
         const email = req.params.email
-        console.log(3, email)
+        // console.log(3, email)
         const query = { email }
         const user = await usersCollection.findOne(query)
         res.send({ isBuyers: user?.type === 'Buyers' })
     })
     app.post('/bookings', async (req, res) => {
         const booking = req.body
+
         console.log(booking)
 
         // const query = {
@@ -107,9 +127,9 @@ async function run() {
         //     return res.status(403).send({ message: "Forbidden Access" })
         // }
         // console.log('Token', req.headers.authorization)
-        // const query = {
-        //     email: email
-        // }
+        const query = {
+            email: email
+        }
         const bookings = await bookingsCollection.find(query).toArray()
         res.send(bookings)
     })
