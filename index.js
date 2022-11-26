@@ -25,6 +25,7 @@ async function run() {
     const usersCollection = client.db('clothesHub').collection('users')
     const bookingsCollection = client.db('clothesHub').collection('bookings')
     const myProductsCollection = client.db('clothesHub').collection('myProducts')
+    const advertisementsCollection = client.db('clothesHub').collection('advertisements')
 
     app.get('/myproducts', async (req, res) => {
         const query = {}
@@ -35,6 +36,29 @@ async function run() {
         const product = req.body
         console.log('user', product)
         const result = await myProductsCollection.insertOne(product)
+        res.send(result)
+    })
+    app.get('/advertisements', async (req, res) => {
+        const query = {}
+        const result = await advertisementsCollection.find(query).toArray()
+        res.send(result)
+    })
+    app.post('/advertisements', async (req, res) => {
+        const product = req.body
+        console.log('user', product)
+        const result = await advertisementsCollection.insertOne(product)
+        res.send(result)
+    })
+    app.put('/myproducts/:id', async (req, res) => {
+        const id = req.params.id
+        const filter = { _id: ObjectId(id) }
+        const options = { upsert: true }
+        const updatedDoc = {
+            $set: {
+                advertised: true
+            }
+        }
+        const result = await myProductsCollection.updateOne(filter, updatedDoc, options)
         res.send(result)
     })
     app.get('/category', async (req, res) => {
