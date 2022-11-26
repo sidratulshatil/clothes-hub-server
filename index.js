@@ -107,6 +107,18 @@ async function run() {
         const result = await usersCollection.deleteOne(filter)
         res.send(result)
     })
+    app.put('/users/:id', async (req, res) => {
+        const id = req.params.id
+        const filter = { _id: ObjectId(id) }
+        const options = { upsert: true }
+        const updatedDoc = {
+            $set: {
+                verified: true
+            }
+        }
+        const result = await usersCollection.updateOne(filter, updatedDoc, options)
+        res.send(result)
+    })
     app.post('/bookings', async (req, res) => {
         const booking = req.body
 
