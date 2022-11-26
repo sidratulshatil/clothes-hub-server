@@ -24,7 +24,19 @@ async function run() {
     const jeansCollection = client.db('clothesHub').collection('jeans')
     const usersCollection = client.db('clothesHub').collection('users')
     const bookingsCollection = client.db('clothesHub').collection('bookings')
+    const myProductsCollection = client.db('clothesHub').collection('myProducts')
 
+    app.get('/myproducts', async (req, res) => {
+        const query = {}
+        const result = await myProductsCollection.find(query).toArray()
+        res.send(result)
+    })
+    app.post('/myproducts', async (req, res) => {
+        const product = req.body
+        console.log('user', product)
+        const result = await myProductsCollection.insertOne(product)
+        res.send(result)
+    })
     app.get('/category', async (req, res) => {
         const query = {}
         const result = await clothesCategoryCollection.find(query).toArray()
@@ -139,7 +151,7 @@ async function run() {
     })
     app.get('/bookings', async (req, res) => {
         const email = req.query.email
-        // // console.log(email)
+        console.log(email)
         // const decodedEmail = req.decoded.email
         // if (email !== decodedEmail) {
         //     return res.status(403).send({ message: "Forbidden Access" })
@@ -150,6 +162,15 @@ async function run() {
         }
         const bookings = await bookingsCollection.find(query).toArray()
         res.send(bookings)
+    })
+    app.get('/users/email', async (req, res) => {
+        const email = req.query.email
+        // console.log('inside:', email)
+        const query = {
+            email: email
+        }
+        const user = await usersCollection.find(query).toArray()
+        res.send(user)
     })
 }
 run().catch(console.log)
