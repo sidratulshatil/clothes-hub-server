@@ -5,6 +5,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken')
 
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+
 const app = express()
 // Middleware
 app.use(cors())
@@ -12,6 +14,7 @@ app.use(express.json())
 
 const verifyJWT = (req, res, next) => {
     const authHeader = req.headers.authorization
+    console.log("JWT", authHeader)
     if (!authHeader) {
         return res.status(401).send('Unauthorized Access')
     }
@@ -41,6 +44,7 @@ async function run() {
     const myProductsCollection = client.db('clothesHub').collection('myProducts')
     const myWishlistsCollection = client.db('clothesHub').collection('myWishLists')
     const advertisementsCollection = client.db('clothesHub').collection('advertisements')
+    const paymentsCollection = client.db('clothesHub').collection('payments')
 
     const verifySeller = async (req, res, next) => {
         // console.log('insideVerifyAdmin', req.decoded)
@@ -53,7 +57,68 @@ async function run() {
         }
         next()
     }
-
+    app.post('/payments', async (req, res) => {
+        const payment = req.body
+        console.log('payment products', payment)
+        const result = await paymentsCollection.insertOne(payment)
+        const id = payment.bookingId
+        const productId = payment.productId
+        const filter = { _id: ObjectId(id) }
+        const updatedDoc = {
+            $set: {
+                paid: true,
+                transactionId: payment.transactionId
+            }
+        }
+        const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+        if (payment.category_name === "T Shirts") {
+            const filter = { _id: ObjectId(productId) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await tshirtsCollection.updateOne(filter, updatedDoc)
+        }
+        if (payment.category_name === "Hoodies") {
+            const filter = { _id: ObjectId(productId) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await hoodiesCollection.updateOne(filter, updatedDoc)
+        }
+        if (payment.category_name === "Jeans") {
+            const filter = { _id: ObjectId(productId) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await jeansCollection.updateOne(filter, updatedDoc)
+        }
+        res.send(result)
+    })
+    app.post('/create-payment-intent', async (req, res) => {
+        const booking = req.body
+        const price = booking.price
+        const amount = price * 100
+        const paymentIntent = await stripe.paymentIntents.create({
+            currency: 'usd',
+            amount: amount,
+            "payment_method_types": [
+                "card"
+            ]
+        });
+        res.send({
+            clientSecret: paymentIntent.client_secret,
+        });
+        console.log('P-S', paymentIntent.client_secret)
+    })
     app.get('/jwt', async (req, res) => {
         const email = req.query.email
         console.log('jwt', email)
@@ -166,7 +231,7 @@ async function run() {
     app.delete('/bookings/product/:id', async (req, res) => {
         const user = req.body
         const category = user.category_name
-        console.log('Deleted category', category)
+        // console.log('Deleted category', category)
         if (category === 'T Shirts') {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
@@ -185,6 +250,12 @@ async function run() {
             const result = await jeansCollection.deleteOne(filter)
             return res.send(result)
         }
+    })
+    app.get('/bookings/:id', async (req, res) => {
+        const id = req.params.id
+        const query = { _id: ObjectId(id) }
+        const booking = await bookingsCollection.findOne(query)
+        res.send(booking)
     })
     app.post('/users', async (req, res) => {
         const user = req.body
@@ -246,7 +317,7 @@ async function run() {
     app.post('/bookings', async (req, res) => {
         const booking = req.body
 
-        // console.log(booking)
+        console.log(booking)
 
         // const query = {
         //     appointmentDate: booking.appointmentDate,
